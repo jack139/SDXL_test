@@ -83,11 +83,14 @@ if __name__ == '__main__':
 
             start = time.time()
 
-            if '|' in raw_input_text:
-                input_text = raw_input_text.split('|') # filename|prompt      
-                refine(input_text[0].strip(), input_text[1].strip())
-            else:
-                gen(raw_input_text)
+            try:
+                if '|' in raw_input_text:
+                    input_text = raw_input_text.split('|') # filename|prompt      
+                    refine(input_text[0].strip(), input_text[1].strip())
+                else:
+                    gen(raw_input_text)
+            except Exception as e:
+                print(e)
 
             print(f">>>>>>> Time elapsed: {(time.time() - start):.3f} sec.\n\n")
 
