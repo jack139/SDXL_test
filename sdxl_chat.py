@@ -15,16 +15,17 @@ parser.add_argument('--no_refine', action='store_true', help='do not use refine 
 parser.add_argument('--no_compile', action='store_true', help='do not compile model (PyTorch < 2.0)')
 args = parser.parse_args()
 
+'''
 if torch.cuda.is_available():
     torch.set_default_device("cuda")
 else:
     torch.set_default_device("cpu")
-
+'''
 
 start = time.time()
 print("Load model base model ...")
 base = DiffusionPipeline.from_pretrained(f"{args.model_path}/stable-diffusion-xl-base-1.0", 
-    torch_dtype=torch.bfloat16, use_safetensors=True, variant="bfp16").to("cuda")
+    torch_dtype=torch.float16, use_safetensors=True, variant="fp16").to("cuda")
 if not args.no_compile:
     base.unet = torch.compile(base.unet, mode="reduce-overhead", fullgraph=True)
 print(f"Time elapsed: {(time.time() - start):.3f} sec.")
@@ -36,9 +37,9 @@ if not args.no_refine:
         f"{args.model_path}/stable-diffusion-xl-refiner-1.0",
         text_encoder_2=base.text_encoder_2,
         vae=base.vae,
-        torch_dtype=torch.bfloat16,
+        torch_dtype=torch.float16,
         use_safetensors=True,
-        variant="bfp16",
+        variant="fp16",
     ).to("cuda")
     if not args.no_compile:
         refiner.unet = torch.compile(refiner.unet, mode="reduce-overhead", fullgraph=True)
@@ -63,22 +64,23 @@ def gen(prompt, refine=False):
     else:
         image = base(prompt=prompt).images[0]
     
-    image.save(f"sdxl-{int(time.ctime())}.jpg")
+    image.save(f"sdxl-{int(time.time())}.jpg")
 
 
-with torch.no_grad():
-    print("Start inference mode.")
-    print('=' * 85)
+if __name__ == '__main__':
+    with torch.no_grad():
+        print("Start inference mode.")
+        print('=' * 85)
 
-    while True:
-        raw_input_text = input("Prompt:")
-        raw_input_text = str(raw_input_text)
-        if len(raw_input_text.strip()) == 0:
-            break
+        while True:
+            raw_input_text = input("Prompt:")
+            raw_input_text = str(raw_input_text)
+            if len(raw_input_text.strip()) == 0:
+                break
 
-        start = time.time()
-        gen(raw_input_text, not args.no_refine)
-        print(f">>>>>>> Time elapsed: {(time.time() - start):.3f} sec.\n\n")
+            start = time.time()
+            gen(raw_input_text, not args.no_refine)
+            print(f">>>>>>> Time elapsed: {(time.time() - start):.3f} sec.\n\n")
 
 
 '''
