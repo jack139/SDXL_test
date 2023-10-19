@@ -12,7 +12,7 @@ high_noise_frac = 0.8
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model_path', default="stabilityai", type=str)
+parser.add_argument('--model_path', default=".", type=str)
 parser.add_argument('--no_compile', action='store_true', help='do not compile model (PyTorch < 2.0)')
 args = parser.parse_args()
 
