@@ -72,13 +72,19 @@ if __name__ == '__main__':
     with torch.no_grad():
         print("Start inference mode.")
         print('=' * 85)
+        print('<enter> to use the last prompt.')
+        print('"<image-path>|<prompt>" to refine the image provided.')
+        print('"!" to quit.')
+        print('=' * 85)
+
+        last_prompt = "Black and white street photography of a rainy night in New York, reflections on wet pavement."
 
         while True:
             raw_input_text = input("Prompt:")
             raw_input_text = str(raw_input_text).strip()
             if len(raw_input_text) == 0:
-                continue
-            if raw_input_text == '!':
+                raw_input_text = last_prompt
+            elif raw_input_text == '!':
                 break
 
             start = time.time()
@@ -94,6 +100,7 @@ if __name__ == '__main__':
 
             print(f">>>>>>> Time elapsed: {(time.time() - start):.3f} sec.\n\n")
 
+            last_prompt = raw_input_text
 
 '''
 # 单独使用 refine
